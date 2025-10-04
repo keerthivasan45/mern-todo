@@ -1,0 +1,3 @@
+/* Keep minimal since animations now live in Tailwind config */
+#root { text-align: left; }
+.focus-ring { outline: none; box-shadow: 0 0 0 4px rgba(99,102,241,.25); }

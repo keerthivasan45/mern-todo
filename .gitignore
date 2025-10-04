@@ -1,0 +1,19 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn-error.log*
+pnpm-lock.yaml
+
+# Vite build
+frontend/dist/
+*.local
+
+# Env
+.env
+frontend/.env
+backend/.env
+
+# OS/IDE
+.DS_Store
+Thumbs.db
+.vscode/
