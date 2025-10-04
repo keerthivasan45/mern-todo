@@ -25,7 +25,6 @@ app.use(cors({
     return cb(new Error('Not allowed by CORS'));
   },
 }));
-app.options('/(.*)', cors()); // Express 5-compatible wildcard
 
 
 app.use(express.json());
