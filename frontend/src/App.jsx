@@ -13,7 +13,12 @@ function App() {
     const checkConnection = async () => {
       try {
         const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-        await axios.get(`${API_BASE}/api/tasks`);
+
+
+await axios.get(`${API_BASE}/api/tasks`);
+await axios.post(`${API_BASE}/api/tasks`, payload);
+await axios.delete(`${API_BASE}/api/tasks/${id}`);
+
 
         setIsConnected(true);
         setError(null);
