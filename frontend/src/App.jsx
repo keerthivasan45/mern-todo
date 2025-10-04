@@ -12,7 +12,9 @@ function App() {
   useEffect(() => {
     const checkConnection = async () => {
       try {
-        await axios.get('http://localhost:5000');
+        const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+        await axios.get(`${API_BASE}/api/tasks`);
+
         setIsConnected(true);
         setError(null);
       } catch {
