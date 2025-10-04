@@ -8,19 +8,24 @@ dotenv.config();
 
 const app = express();
 
-// CORS: permissive in dev, restricted in prod
+// Normalize origins to avoid trailing-slash mismatches
+const normalize = (url) => url?.replace(/\/+$/, '');
+
+// CORS: permissive in dev, restricted in prod via FRONTEND_ORIGIN
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:8888',
-  process.env.FRONTEND_ORIGIN, // e.g., https://your-site.netlify.app
-].filter(Boolean);
+  process.env.FRONTEND_ORIGIN, // e.g., https://animated-smakager-7f7c46.netlify.app
+].filter(Boolean).map(normalize);
 
 app.use(cors({
-  origin: (origin, cb) => {
-    if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
+  origin(origin, cb) {
+    const o = normalize(origin);
+    if (!o || allowedOrigins.includes(o)) return cb(null, true);
     return cb(new Error('Not allowed by CORS'));
   },
 }));
+app.options('*', cors());
 
 app.use(express.json());
 
@@ -42,35 +47,40 @@ mongoose.connect(mongoUri)
 app.get('/', (_req, res) => res.status(200).send('Backend is working!'));
 
 // ===== MERN To-Do API routes =====
-app.get('/api/tasks', async (_req, res) => {
+app.get('/api/tasks', async (_req, res, next) => {
   try {
     const tasks = await Task.find().sort({ createdAt: 1 });
     res.json(tasks);
   } catch (e) {
-    res.status(500).json({ message: 'Failed to fetch tasks' });
+    next(e);
   }
 });
 
-app.post('/api/tasks', async (req, res) => {
+app.post('/api/tasks', async (req, res, next) => {
   try {
     const text = String(req.body?.text || '').trim();
     if (!text) return res.status(400).json({ message: 'Text is required' });
     const newTask = await Task.create({ text });
     res.status(201).json(newTask);
   } catch (e) {
-    res.status(500).json({ message: 'Failed to add task' });
+    next(e);
   }
 });
 
-app.delete('/api/tasks/:id', async (req, res) => {
+app.delete('/api/tasks/:id', async (req, res, next) => {
   try {
     await Task.findByIdAndDelete(req.params.id);
     res.sendStatus(204);
   } catch (e) {
-    res.status(500).json({ message: 'Failed to delete task' });
+    next(e);
   }
+});
+
+// Final error handler for clear logs and JSON errors
+app.use((err, req, res, next) => {
+  console.error('Unhandled error:', err);
+  res.status(500).json({ message: 'Server error', detail: err.message });
 });
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
-
